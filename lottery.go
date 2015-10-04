@@ -1,26 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"github.com/deet/govenmo"
 	"github.com/jmcvetta/randutil"
-	"time"
+	"log"
 )
 
 func main() {
 	account, err := venmoAccount()
 	if err != nil {
-		fmt.Println("Error refreshing account:", err)
+		log.Println("Error refreshing account:", err)
 	} else {
-		fmt.Println("Account refreshed")
+		log.Println("Account refreshed")
 	}
 
-	fmt.Println("balance is", account.Balance)
-
-	updatedSince := time.Now()
-	payments, err := account.PaymentsSince(updatedSince)
+	log.Println("balance is", account.Balance)
+	payments, err := paymentsSinceLastRun(&account)
 	if err != nil {
-		fmt.Println("Error fetching payments:", err)
+		log.Println("Error fetching payments:", err)
 		return
 	}
 
@@ -33,7 +30,7 @@ func main() {
 		target := payment.Target.User.DisplayName
 		note := payment.Note
 		amount := payment.Amount
-		fmt.Println(actor, "paid", target, amount, "dollars for", note)
+		log.Println(actor, "paid", target, amount, "dollars for", note)
 
 		if target == "Smick Share" {
 			balance += amount
@@ -42,21 +39,19 @@ func main() {
 				Item:   payment.Actor.Id,
 			}
 			choices = append(choices, choice)
-		} else {
-			break
 		}
 	}
 
 	if balance == 0 {
-		fmt.Println("no money to give out")
+		log.Println("no money to give out")
 		return
 	}
 
-	fmt.Println("Final balance is", balance)
-	fmt.Println(choices)
+	log.Println("Final balance is", balance)
+	log.Println(choices)
 	winner, err := randutil.WeightedChoice(choices)
 	if err != nil {
-		fmt.Println("Error selecting winner:", err)
+		log.Println("Error selecting winner:", err)
 		return
 	}
 	winnerId := winner.Item
@@ -66,8 +61,8 @@ func main() {
 
 	sentPayment, err := account.PayOrCharge(target, balance, "ayy lmao!", "public")
 	if err != nil {
-		fmt.Println("Error sending payment:", err)
+		log.Println("Error sending payment:", err)
 	} else {
-		fmt.Println("Payment succeeded", sentPayment)
+		log.Println("Payment succeeded", sentPayment)
 	}
 }
