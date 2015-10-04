@@ -8,11 +8,8 @@ import (
 )
 
 func main() {
-	account := govenmo.Account{
-		AccessToken: "c25c552dba68c004af633f6535fe57c8f8c8c06c9eca5b140aa8974eb3067ff9",
-	}
-
-	if err := account.Refresh(); err != nil {
+	account, err := venmoAccount()
+	if err != nil {
 		fmt.Println("Error refreshing account:", err)
 	} else {
 		fmt.Println("Account refreshed")
